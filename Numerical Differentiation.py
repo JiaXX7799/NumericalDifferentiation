@@ -5,12 +5,12 @@ import pandas as pd
 import qtmodern.styles
 import qtmodern.windows
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QFontDatabase
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
                              QWidget, QPushButton, QLabel, QSpinBox, QFileDialog,
                              QMessageBox, QGroupBox, QFormLayout, QComboBox,
                              QCheckBox, QDoubleSpinBox, QTextEdit, QSplitter)
-from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt, font_manager
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.ticker import MultipleLocator
@@ -20,10 +20,6 @@ import scipy.signal as signal
 class NumericalDifferentiator(QMainWindow):
     def __init__(self):
         super().__init__()
-
-        plt.rcParams['font.sans-serif'] = ['HarmonyOS Sans SC', 'Microsoft YaHei', 'SimHei']
-        plt.rcParams['axes.unicode_minus'] = False
-
         self.setWindowTitle("Numerical Differentiation")
 
         # 初始化数据
@@ -77,12 +73,30 @@ class NumericalDifferentiator(QMainWindow):
         self.figure = Figure(figsize=(10, 8), dpi=100)
         self.canvas = FigureCanvas(self.figure)
 
+        # 加载自定义字体文件
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "HarmonyOS_Sans_SC_Regular.ttf")
+
+        # 检查字体文件是否存在
+        if os.path.exists(path):
+            # 为matplotlib注册字体
+            font_manager.fontManager.addfont(path)
+            custom_font = font_manager.FontProperties(fname=path).get_name()
+            plt.rcParams['font.sans-serif'] = [custom_font, 'SimHei', 'Arial']
+
+            self.custom_font_name = custom_font
+        else:
+            print(f"警告: 找不到字体文件 {path}")
+            plt.rcParams['font.sans-serif'] = ['SimHei', 'Arial', 'Helvetica']
+            self.custom_font_name = 'Arial'
+
+        plt.rcParams['axes.unicode_minus'] = False
+
         # 创建UI
         self.create_widgets()
         self.setup_layout()
 
         # 设置窗口初始大小
-        self.resize(1400, 900)
+        self.resize(1400, 600)
 
     def create_widgets(self):
         self.file_label.setWordWrap(True)
@@ -417,6 +431,7 @@ class NumericalDifferentiator(QMainWindow):
 
         # 清除之前的图表
         self.figure.clear()
+        font = {'family': self.custom_font_name, 'size': 10}
 
         # 创建两个子图
         ax1 = self.figure.add_subplot(211)
@@ -429,9 +444,9 @@ class NumericalDifferentiator(QMainWindow):
         if self.show_original_check.isChecked():
             ax1.scatter(time_minutes, self.damage_data, color='blue', alpha=0.5, s=20, label='原始数据点')
         ax1.plot(time_minutes, self.damage_data, 'b-', alpha=0.7, label='总伤害')
-        ax1.set_xlabel('时间 (分钟)')
-        ax1.set_ylabel('总伤害')
-        ax1.set_title('总伤害曲线')
+        ax1.set_xlabel('时间 (分钟)', fontdict=font)
+        ax1.set_ylabel('总伤害', fontdict=font)
+        ax1.set_title('总伤害曲线', fontdict=font)
         ax1.legend()
         ax1.grid(True, linestyle='--', alpha=0.7)
 
@@ -457,9 +472,9 @@ class NumericalDifferentiator(QMainWindow):
             ax2.scatter(time_minutes[self.valley_indices], self.slope_data[self.valley_indices],
                         color='blue', s=80, marker='v', label='谷值', zorder=5)
 
-        ax2.set_xlabel('时间 (分钟)')
-        ax2.set_ylabel('DPS')
-        ax2.set_title('DPS曲线')
+        ax2.set_xlabel('时间 (分钟)', fontdict=font)
+        ax2.set_ylabel('DPS', fontdict=font)
+        ax2.set_title('DPS曲线', fontdict=font)
         ax2.legend()
         ax2.grid(True, linestyle='--', alpha=0.7)
 
@@ -518,8 +533,19 @@ class NumericalDifferentiator(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     qtmodern.styles.dark(app)
-    font = QFont("HarmonyOS Sans SC", 10)
-    app.setFont(font)
+    # 加载自定义字体
+    font_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "HarmonyOS_Sans_SC_Regular.ttf")
+    font_id = QFontDatabase.addApplicationFont(font_path)
+
+    if font_id != -1:
+        # 如果成功加载字体
+        font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
+        app_font = QFont(font_family, 10)
+    else:
+        # 如果未能加载字体，使用系统字体
+        print(f"警告: 无法加载字体文件 {font_path}")
+        app_font = QFont('Arial', 10)
+    app.setFont(app_font)
     window = NumericalDifferentiator()
     mw = qtmodern.windows.ModernWindow(window)
 
