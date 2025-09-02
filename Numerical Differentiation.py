@@ -74,7 +74,7 @@ class NumericalDifferentiator(QMainWindow):
         self.canvas = FigureCanvas(self.figure)
 
         # 加载自定义字体文件
-        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "HarmonyOS_Sans_SC_Regular.ttf")
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "HarmonyOS_SansSC_Regular.ttf")
 
         # 检查字体文件是否存在
         if os.path.exists(path):
@@ -96,7 +96,7 @@ class NumericalDifferentiator(QMainWindow):
         self.setup_layout()
 
         # 设置窗口初始大小
-        self.resize(1400, 600)
+        self.resize(1800, 600)
 
     def create_widgets(self):
         self.file_label.setWordWrap(True)
@@ -534,7 +534,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     qtmodern.styles.dark(app)
     # 加载自定义字体
-    font_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "HarmonyOS_Sans_SC_Regular.ttf")
+    font_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "HarmonyOS_SansSC_Regular.ttf")
     font_id = QFontDatabase.addApplicationFont(font_path)
 
     if font_id != -1:
